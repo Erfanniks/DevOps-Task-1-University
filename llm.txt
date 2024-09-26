@@ -1,0 +1,27 @@
+LLM Tool Used:
+ChatGPT (by OpenAI)
+
+Motivation/Reason for Using LLM:
+
+I used ChatGPT to assist with this Docker Compose hands-on exercise for the following reasons:
+
+1. To get guidance on how to implement the two interworking services in Python and JavaScript.
+2. To resolve issues during development, such as missing system commands (ps and uptime) in containers and correctly structuring the docker-compose.yaml file.
+3. To ensure my approach was aligned with best practices in Docker and DevOps.
+
+How and Why LLM Helped:
+ChatGPT helped in several ways:
+
+1. It provided a step-by-step guide to structuring the project, including instructions on Dockerfiles, application code, and organizing the Docker Compose configuration.
+2. It explained the logic and how the application should work.
+3. It assisted in debugging issues, such as missing system utilities in the Docker containers, by recommending necessary package installations.
+4. It clarified submission requirements (e.g., how to capture Docker container and network status and what should be included in docker-status.txt).
+
+Mistakes Made by LLM:
+
+1. Initially, the LLM recommended installing some packages that were not necessary for the task. However, after further prompts, it refined the suggestions to focus only on the required packages (e.g., procps for the missing ps and uptime commands).
+2. Occasionally, the LLM provided overly complicated or very general explanations when more direct instructions would have been sufficient.
+
+Things LLM Was Not Able to Provide:
+
+The LLM was unable to directly verify whether my Docker containers were functioning correctly or whether the network configuration was fully operational. This required manual testing on my end.
