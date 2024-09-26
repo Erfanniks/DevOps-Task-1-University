@@ -1,0 +1,13 @@
+In this exercise, I learned how Docker containers share certain resources with the host system. Below are my findings:
+
+1. Kernel sharing: docker containers don't have their own kernel like virtual machines. so instead they share their host's kernel. 
+this makes them more light weiht and faster because they don't need their own operating systems.
+
+2. Networking: containers can have their own  network but also they can communicate with the host and other containers through network setup.
+for example service1 is accessible on port 8199 on my host machine. and it can communicate with service2 through network configuration.
+
+3. Processes: each container runs its own Processes and can't see the Processes run on host machine or other containers.
+for example if we run ps in a container its only going to show the Processes within that container.
+
+4. System information: containers can access some system level information from the host. Like how long the system has been running, 
+(which is uptime). this shows that containers can still share some system level information with the host. Although they are isolated.
