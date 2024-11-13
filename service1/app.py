@@ -1,10 +1,14 @@
 import os
 import subprocess
 import time
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import requests
 
 app = Flask(__name__)
+
+# Track the last request time
+last_request_time = 0
+cooldown_period = 2  # Cooldown period in seconds
 
 def get_info():
     ip_address = os.popen('hostname -I').read().strip()
@@ -20,26 +24,35 @@ def get_info():
 
 @app.route('/')
 def index():
-    # Service 1 collects its own information
-    service1_info = get_info()
-    time.sleep(2)  # Add 2-second delay here
+    global last_request_time
 
-    # Service 1 fetches Service 2 information
+    # Check if we're within the cooldown period
+    current_time = time.time()
+    if current_time - last_request_time < cooldown_period:
+        # If within cooldown, return an error without processing
+        return jsonify({"error": "Service1 is cooling down, please try again later"}), 503
+
+    # Update the last request time
+    last_request_time = current_time
+
+    # Process the request and get information
+    service1_info = get_info()
+
+    # Fetch Service 2 information
     try:
         service2_info = requests.get('http://service2:5000/').json()
     except:
         service2_info = {'error': 'Service2 unreachable'}
 
+    # Return the response with Service 1 and Service 2 information
     return jsonify({
         'Service1': service1_info,
         'Service2': service2_info
     })
 
-# New route to handle stop requests
+# Route to handle stop requests
 @app.route('/stop', methods=['POST'])
 def stop():
-    # Placeholder response for stopping containers
-    # You can implement the actual stop logic here if needed
     return jsonify({"message": "Stop function triggered, but stopping is not implemented."}), 200
 
 if __name__ == '__main__':

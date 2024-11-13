@@ -1,8 +1,12 @@
-CONTAINER ID   IMAGE                  COMMAND                  CREATED          STATUS          PORTS                    NAMES
-df70c5a1be72   devopstask1-service1   "python app.py"          37 seconds ago   Up 34 seconds   0.0.0.0:8199->8199/tcp   service1
-0f265f6aeda1   devopstask1-service2   "docker-entrypoint.s…"   37 seconds ago   Up 35 seconds                            service2
-NETWORK ID     NAME                  DRIVER    SCOPE
-d33c7d2d8802   bridge                bridge    local
-b3c395b1e0b0   devopstask1_default   bridge    local
-6cf2ce77223b   host                  host      local
-f9326ae4d5ec   none                  null      local
+CONTAINER ID   IMAGE                  COMMAND                  CREATED              STATUS              PORTS                            NAMES
+fa8944b921df   nginx:latest           "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp, 0.0.0.0:8198->8198/tcp   nginx
+5fdc39d81cd9   devopstask1-service1   "python app.py"          About a minute ago   Up About a minute                                    devopstask1-service1-2
+84ff969bc65b   devopstask1-service1   "python app.py"          About a minute ago   Up About a minute                                    devopstask1-service1-1
+9f7d4c84f22f   devopstask1-service2   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:5000->5000/tcp           service2
+e96a65224369   devopstask1-service1   "python app.py"          About a minute ago   Up About a minute                                    devopstask1-service1-3
+
+NETWORK ID     NAME                    DRIVER    SCOPE
+c70e4b5b8761   bridge                  bridge    local
+f110feb190f7   devopstask1_mynetwork   bridge    local
+6cf2ce77223b   host                    host      local
+f9326ae4d5ec   none                    null      local
