@@ -1,6 +1,7 @@
 import os
 import subprocess
-from flask import Flask, jsonify
+import time
+from flask import Flask, jsonify, request
 import requests
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ def get_info():
 def index():
     # Service 1 collects its own information
     service1_info = get_info()
+    time.sleep(2)  # Add 2-second delay here
 
     # Service 1 fetches Service 2 information
     try:
@@ -32,6 +34,13 @@ def index():
         'Service1': service1_info,
         'Service2': service2_info
     })
+
+# New route to handle stop requests
+@app.route('/stop', methods=['POST'])
+def stop():
+    # Placeholder response for stopping containers
+    # You can implement the actual stop logic here if needed
+    return jsonify({"message": "Stop function triggered, but stopping is not implemented."}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8199)
