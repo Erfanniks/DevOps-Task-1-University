@@ -4,11 +4,16 @@ stages:
   - deploy
 
 variables:
-  DOCKER_COMPOSE_VERSION: "2.21.0"
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+services:
+  - docker:dind
 
 before_script:
   - docker info
-  - docker-compose --version
+  - apk add --no-cache docker-compose python3 py3-pip curl
+  - pip3 install requests
 
 build:
   stage: build
@@ -20,13 +25,7 @@ test:
   script:
     - docker-compose up -d
     - sleep 10  # Wait for services to start
-    - |
-      # Test state management
-      curl -X PUT -H "Content-Type: text/plain" -d "RUNNING" localhost:8197/state
-      curl -X GET localhost:8197/state
-      curl -X GET localhost:8197/run-log
-      # Test request functionality
-      curl -X GET localhost:8197/request
+    - python3 tests/test_api.py
     - docker-compose down
 
 deploy:

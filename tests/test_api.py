@@ -1,8 +1,8 @@
-# tests/test_api.py
 import requests
 import time
 
 def test_state_transitions():
+    """Test state management API endpoints"""
     base_url = "http://localhost:8197"
     
     # Test initial state
@@ -24,7 +24,11 @@ def test_state_transitions():
     assert response.status_code == 200
     assert response.text == "PAUSED"
     
-    # Verify run-log contains transitions
+    # Test request when paused (should fail)
+    response = requests.get(f"{base_url}/request")
+    assert response.status_code == 503
+    
+    # Test run-log contains transitions
     response = requests.get(f"{base_url}/run-log")
     assert response.status_code == 200
     assert "INIT->RUNNING" in response.text
