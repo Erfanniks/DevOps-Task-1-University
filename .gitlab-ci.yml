@@ -2,15 +2,11 @@ image: docker:latest
 
 services:
   - name: docker:dind
-    command: ["--tls=false"]
 
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
-  # Add these to ensure docker-in-docker works properly
-  DOCKER_TLS: 'false'
-  FF_NETWORK_PER_BUILD: 'true'
 
 stages:
   - build
@@ -18,32 +14,25 @@ stages:
   - deploy
 
 before_script:
-  # Install required tools
   - apk update
   - apk add --no-cache py3-pip curl docker-compose
   - pip3 install requests
 
 build:
   stage: build
-  tags:
-    - docker
   script:
     - docker-compose build --no-cache
 
 test:
   stage: test
-  tags:
-    - docker
   script:
     - docker-compose up -d
-    - sleep 10  # Wait for services to start
+    - sleep 10
     - python3 tests/test_api.py
     - docker-compose down
 
 deploy:
   stage: deploy
-  tags:
-    - docker
   script:
     - docker-compose up -d
   only:
