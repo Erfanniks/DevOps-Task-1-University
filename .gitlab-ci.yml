@@ -1,0 +1,37 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_COMPOSE_VERSION: "2.21.0"
+
+before_script:
+  - docker info
+  - docker-compose --version
+
+build:
+  stage: build
+  script:
+    - docker-compose build --no-cache
+
+test:
+  stage: test
+  script:
+    - docker-compose up -d
+    - sleep 10  # Wait for services to start
+    - |
+      # Test state management
+      curl -X PUT -H "Content-Type: text/plain" -d "RUNNING" localhost:8197/state
+      curl -X GET localhost:8197/state
+      curl -X GET localhost:8197/run-log
+      # Test request functionality
+      curl -X GET localhost:8197/request
+    - docker-compose down
+
+deploy:
+  stage: deploy
+  script:
+    - docker-compose up -d
+  only:
+    - project
