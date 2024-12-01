@@ -15,8 +15,7 @@ stages:
 
 before_script:
   - apk update
-  - apk add --no-cache py3-pip curl docker-compose
-  - pip3 install requests
+  - apk add --no-cache python3 py3-requests docker-compose # Changed this line to use Alpine package
 
 build:
   stage: build
