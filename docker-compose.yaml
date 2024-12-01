@@ -1,12 +1,20 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - mynetwork
+
   service1:
     build: ./service1
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure
+    depends_on:
+      - redis
     networks:
       - mynetwork
 
@@ -22,11 +30,12 @@ services:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "8198:8198"  # Corrected to expose port 8198 as required
+      - "8198:8198"
+      - "8197:8197"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Mount nginx.conf
-      - ./nginx/.htpasswd:/etc/nginx/.htpasswd  # Mount .htpasswd
-      - ./nginx/index.html:/usr/share/nginx/html/index.html  # Mount index.html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd
+      - ./nginx/index.html:/usr/share/nginx/html/index.html
     depends_on:
       - service1
       - service2

@@ -4,21 +4,31 @@ import time
 from datetime import datetime
 from flask import Flask, jsonify, request
 import requests
+import redis
 
 app = Flask(__name__)
 
-# Global variables
+# Redis connection
+redis_client = redis.Redis(host='redis', port=6379, db=0)
+
+# Constants
 VALID_STATES = ['INIT', 'PAUSED', 'RUNNING', 'SHUTDOWN']
-current_state = 'INIT'
-state_log = []
-last_request_time = 0
 cooldown_period = 2
 
+def get_current_state():
+    """Get current state from Redis."""
+    state = redis_client.get('current_state')
+    return state.decode('utf-8') if state else 'INIT'
+
+def set_current_state(new_state):
+    """Set current state in Redis."""
+    redis_client.set('current_state', new_state)
+
 def log_state_change(old_state, new_state):
-    """Log state transitions with timestamp."""
+    """Log state transitions with timestamp in Redis."""
     timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H.%M:%S.%fZ')
     log_entry = f"{timestamp}: {old_state}->{new_state}"
-    state_log.append(log_entry)
+    redis_client.rpush('state_log', log_entry)
 
 def get_info():
     """Gather system information."""
@@ -36,10 +46,8 @@ def get_info():
 @app.route('/state', methods=['GET', 'PUT'])
 def manage_state():
     """Handle state management."""
-    global current_state
-    
     if request.method == 'GET':
-        return current_state, 200
+        return get_current_state(), 200
     
     if request.method == 'PUT':
         new_state = request.data.decode('utf-8').strip()
@@ -47,44 +55,46 @@ def manage_state():
         if new_state not in VALID_STATES:
             return "Invalid state", 400
             
+        current_state = get_current_state()
         if new_state == current_state:
             return current_state, 200
             
-        old_state = current_state
-        current_state = new_state
-        log_state_change(old_state, new_state)
+        set_current_state(new_state)
+        log_state_change(current_state, new_state)
         
         if new_state == 'INIT':
             # Reset everything except logs
-            global last_request_time
-            last_request_time = 0
+            redis_client.delete('last_request_time')
         elif new_state == 'SHUTDOWN':
             # Signal for shutdown - actual shutdown handled by container orchestration
             pass
             
-        return current_state, 200
+        return new_state, 200
 
 @app.route('/run-log', methods=['GET'])
 def get_run_log():
     """Return the state transition log."""
-    return '\n'.join(state_log), 200
+    logs = redis_client.lrange('state_log', 0, -1)
+    return '\n'.join([log.decode('utf-8') for log in logs]), 200
 
 @app.route('/request', methods=['GET'])
 def handle_request():
     """Handle request - same as index but returns plain text."""
+    current_state = get_current_state()
+    
     if current_state == 'PAUSED':
         return "Service is paused", 503
     
     if current_state != 'RUNNING':
         return "Service is not in running state", 503
 
-    global last_request_time
+    last_request = redis_client.get('last_request_time')
     current_time = time.time()
     
-    if current_time - last_request_time < cooldown_period:
+    if last_request and (current_time - float(last_request)) < cooldown_period:
         return "Service is cooling down, please try again later", 503
 
-    last_request_time = current_time
+    redis_client.set('last_request_time', current_time)
     
     try:
         service2_info = requests.get('http://service2:5000/').json()
@@ -95,19 +105,21 @@ def handle_request():
 @app.route('/')
 def index():
     """Main endpoint for browser interface."""
+    current_state = get_current_state()
+    
     if current_state == 'PAUSED':
         return jsonify({"error": "Service is paused"}), 503
     
     if current_state != 'RUNNING':
         return jsonify({"error": "Service is not in running state"}), 503
 
-    global last_request_time
+    last_request = redis_client.get('last_request_time')
     current_time = time.time()
     
-    if current_time - last_request_time < cooldown_period:
+    if last_request and (current_time - float(last_request)) < cooldown_period:
         return jsonify({"error": "Service is cooling down, please try again later"}), 503
 
-    last_request_time = current_time
+    redis_client.set('last_request_time', current_time)
 
     # Get information from both services
     service1_info = get_info()
@@ -122,6 +134,8 @@ def index():
     })
 
 if __name__ == '__main__':
-    # Log initial state
-    log_state_change('Initial', 'INIT')
+    # Initialize state if not exists
+    if not redis_client.get('current_state'):
+        set_current_state('INIT')
+        log_state_change('Initial', 'INIT')
     app.run(host='0.0.0.0', port=8199)

@@ -5,5 +5,5 @@ RUN apt-get update && apt-get install -y procps
 WORKDIR /app
 COPY . .
 
-RUN pip install flask requests
+RUN pip install flask requests redis
 CMD ["python", "app.py"]
