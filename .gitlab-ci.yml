@@ -2,11 +2,13 @@ image: docker:latest
 
 services:
   - name: docker:dind
+    command: ["--registry-mirror=https://mirror.gcr.io", "--tls=false"]
 
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
+  FF_NETWORK_PER_BUILD: "false"
 
 stages:
   - build
@@ -14,6 +16,7 @@ stages:
   - deploy
 
 before_script:
+  - export DOCKER_HOST="tcp://docker:2375"
   - apk update
   - apk add --no-cache python3 py3-requests docker-compose openssh-client
 
