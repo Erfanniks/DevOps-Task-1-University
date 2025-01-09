@@ -17,19 +17,47 @@
     <div id="output">Response will appear here...</div>
 
     <script>
+        async function setStateToRunning() {
+            const response = await fetch('/state', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'RUNNING'
+            });
+            return response.ok;
+        }
+
         async function makeRequest() {
             try {
-                const response = await fetch('/service1');
-                const data = await response.json();
-                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+                // Ensure the system is set to RUNNING
+                const stateSet = await setStateToRunning();
+                if (!stateSet) throw new Error('Failed to set state to RUNNING');
+
+                const response = await fetch('/request');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await response.json();
+                    document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+                } else {
+                    const text = await response.text();
+                    document.getElementById('output').textContent = "Unexpected response: " + text;
+                }
             } catch (error) {
-                document.getElementById('output').textContent = "Error: " + error;
+                document.getElementById('output').textContent = "Error: " + error.message;
             }
         }
 
         function stopContainers() {
             fetch('/stop', { method: 'POST' })
-                .then(() => alert("Containers stopped"))
+                .then(response => {
+                    if (response.ok) {
+                        alert("Containers stopped");
+                    } else {
+                        alert(`Error stopping containers: HTTP ${response.status}`);
+                    }
+                })
                 .catch(error => alert("Error stopping containers: " + error));
         }
     </script>

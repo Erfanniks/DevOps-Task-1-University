@@ -15,7 +15,7 @@ stages:
 
 before_script:
   - apk update
-  - apk add --no-cache python3 py3-requests docker-compose # Changed this line to use Alpine package
+  - apk add --no-cache python3 py3-requests docker-compose openssh-client
 
 build:
   stage: build
@@ -33,6 +33,9 @@ test:
 deploy:
   stage: deploy
   script:
-    - docker-compose up -d
+    - ssh -o StrictHostKeyChecking=no user@remote-vm "
+        docker-compose -f /path/to/docker-compose.yaml pull &&
+        docker-compose -f /path/to/docker-compose.yaml up -d
+      "
   only:
     - project
