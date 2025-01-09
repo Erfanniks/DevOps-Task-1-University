@@ -19,11 +19,15 @@ before_script:
 
 build:
   stage: build
+  tags:
+    - docker
   script:
     - docker-compose build --no-cache
 
 test:
   stage: test
+  tags:
+    - docker
   script:
     - docker-compose up -d
     - sleep 10
@@ -32,6 +36,8 @@ test:
 
 deploy:
   stage: deploy
+  tags:
+    - docker
   script:
     - ssh -o StrictHostKeyChecking=no user@remote-vm "
         docker-compose -f /path/to/docker-compose.yaml pull &&
