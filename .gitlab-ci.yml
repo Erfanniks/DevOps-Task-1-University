@@ -1,7 +1,47 @@
-stages:
-  - test
+image: docker:latest
 
-test-runner:
-  stage: test
-  script:
-    - echo "Runner is working correctly"
+services:
+- name: docker:dind
+
+variables:
+DOCKER_HOST: tcp://docker:2375
+DOCKER_TLS_CERTDIR: ""
+DOCKER_DRIVER: overlay2
+
+stages:
+- build
+- test
+- deploy
+
+before_script:
+- apk update
+- apk add --no-cache python3 py3-requests docker-compose openssh-client
+
+build:
+stage: build
+tags:
+- docker
+script:
+- docker-compose build --no-cache
+
+test:
+stage: test
+tags:
+- docker
+script:
+- docker-compose up -d
+- sleep 10
+- python3 tests/test_api.py
+- docker-compose down
+
+deploy:
+stage: deploy
+tags:
+- docker
+script:
+- ssh -o StrictHostKeyChecking=no user@remote-vm "
+docker-compose -f /path/to/docker-compose.yaml pull &&
+docker-compose -f /path/to/docker-compose.yaml up -d
+"
+only:
+- project
