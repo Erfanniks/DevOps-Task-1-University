@@ -34,7 +34,7 @@ test:
   script:
     - docker-compose up -d
     - sleep 10
-    - python3 tests/test_api.py
+    - docker-compose exec service1 python3 /app/tests/test_api.py
     - docker-compose down
 
 deploy:

@@ -1,7 +1,7 @@
 import requests
 import time
 
-BASE_URL = "http://localhost:8197"
+BASE_URL = "http://nginx:8197"
 
 def test_state_transitions():
     """Test state management API endpoints."""
