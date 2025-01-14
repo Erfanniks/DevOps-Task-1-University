@@ -18,9 +18,10 @@ services:
 
   service1:
     build: ./service1
-    container_name: service1
-    ports:
-      - "5000:5000"  # Expose port 5000 for debugging
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     depends_on:
       redis:
         condition: service_healthy
@@ -32,25 +33,14 @@ services:
     networks:
       - app-network
 
-  service2:
-    build: ./service2
-    container_name: service2
-    ports:
-      - "5001:5000"  # Expose service2 on a different external port
-    networks:
-      - app-network
-
   nginx:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "8198:80"  # Map container port 80 to host port 8198
+      - "8198:80"
     depends_on:
       - service1
-      - service2
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Mount Nginx config
-      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro   # Mount basic auth credentials (if required)
-      - ./nginx/index.html:/usr/share/nginx/html/index.html:ro  # Mount custom HTML for Nginx
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - app-network

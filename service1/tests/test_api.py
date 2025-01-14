@@ -21,39 +21,29 @@ def test_state_transitions():
     """Test state management API endpoints."""
     # Test initial state
     response = requests.get(f"{BASE_URL}/state")
-    print(f"DEBUG: /state -> {response.status_code}, {response.text}")
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
-    if response.text != "INIT":
-        print(f"DEBUG: State is '{response.text}', resetting to 'INIT'")
-        requests.put(f"{BASE_URL}/state", data="INIT")
-        response = requests.get(f"{BASE_URL}/state")
-        assert response.text == "INIT", f"Expected 'INIT', got '{response.text}'"
+    assert response.text == "INIT", f"Expected 'INIT', got '{response.text}'"
 
-    # Test transition to RUNNING
-    response = requests.put(f"{BASE_URL}/state", data="RUNNING")
-    print(f"DEBUG: Transition to RUNNING -> {response.status_code}, {response.text}")
+    # Transition to RUNNING
+    response = requests.put(f"{BASE_URL}/state", data="RUNNING", headers={"Content-Type": "text/plain"})
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     assert response.text == "RUNNING", f"Expected 'RUNNING', got '{response.text}'"
 
     # Test /request while RUNNING
     response = requests.get(f"{BASE_URL}/request")
-    print(f"DEBUG: /request while RUNNING -> {response.status_code}")
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
-    # Test transition to PAUSED
-    response = requests.put(f"{BASE_URL}/state", data="PAUSED")
-    print(f"DEBUG: Transition to PAUSED -> {response.status_code}, {response.text}")
+    # Transition to PAUSED
+    response = requests.put(f"{BASE_URL}/state", data="PAUSED", headers={"Content-Type": "text/plain"})
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     assert response.text == "PAUSED", f"Expected 'PAUSED', got '{response.text}'"
 
     # Test /request while PAUSED
     response = requests.get(f"{BASE_URL}/request")
-    print(f"DEBUG: /request while PAUSED -> {response.status_code}")
     assert response.status_code == 503, f"Expected 503, got {response.status_code}"
 
-    # Verify state transition log
+    # Verify log contents
     response = requests.get(f"{BASE_URL}/run-log")
-    print(f"DEBUG: /run-log -> {response.status_code}")
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     log_text = response.text
     assert "INIT->RUNNING" in log_text, f"'INIT->RUNNING' not in log: {log_text}"
@@ -61,7 +51,6 @@ def test_state_transitions():
 
 if __name__ == "__main__":
     wait_for_service()
-    print("DEBUG: Service ready. Waiting briefly before starting tests...")
-    time.sleep(5)  # Short delay to ensure service stability
+    time.sleep(5)  # Wait briefly to ensure services stabilize
     test_state_transitions()
     print("All tests passed!")
