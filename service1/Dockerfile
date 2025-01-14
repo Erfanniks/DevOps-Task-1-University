@@ -1,9 +1,14 @@
+# Use a lightweight Python image
 FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y procps
-
+# Set the working directory inside the container
 WORKDIR /app
+
+# Copy all files from the context to the working directory
 COPY . .
 
-RUN pip install flask requests redis
-CMD ["python", "app.py"]
+# Install Python dependencies
+RUN pip install --no-cache-dir flask requests redis
+
+# Set the default command (optional)
+CMD ["python3", "app.py"]

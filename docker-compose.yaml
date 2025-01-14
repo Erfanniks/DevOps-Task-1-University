@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   redis:
     image: redis:latest
@@ -15,6 +17,9 @@ services:
       - redis
     networks:
       - mynetwork
+    volumes:
+      - ./tests:/app/tests  # Mount the tests directory into the container
+      - ./service1:/app  # Ensure service1 code is mounted
 
   service2:
     build: ./service2
