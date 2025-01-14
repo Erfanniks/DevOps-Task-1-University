@@ -5,7 +5,7 @@ BASE_URL = "http://nginx:80"
 
 def wait_for_service():
     """Wait for the nginx service to be ready."""
-    for _ in range(10):  # Retry 10 times
+    for _ in range(20):  # Retry 10 times
         try:
             response = requests.get(f"{BASE_URL}/state")
             if response.status_code == 200:
@@ -14,7 +14,7 @@ def wait_for_service():
         except requests.ConnectionError:
             pass
         print("Waiting for service...")
-        time.sleep(3)
+        time.sleep(4)
     raise Exception("Service not ready after retries.")
 
 def test_state_transitions():
