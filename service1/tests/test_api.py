@@ -46,8 +46,8 @@ def test_state_transitions():
     response = requests.get(f"{BASE_URL}/run-log")
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     log_text = response.text
-    assert "INIT->RUNNING" in log_text, f"'INIT->RUNNING' not in log: {log_text}"
-    assert "RUNNING->PAUSED" in log_text, f"'RUNNING->PAUSED' not in log: {log_text}"
+    assert "INIT -> RUNNING" in log_text, f"'INIT -> RUNNING' not in log: {log_text}"
+    assert "RUNNING -> PAUSED" in log_text, f"'RUNNING -> PAUSED' not in log: {log_text}"
 
 if __name__ == "__main__":
     wait_for_service()
