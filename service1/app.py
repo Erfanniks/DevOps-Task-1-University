@@ -56,6 +56,7 @@ def manage_state():
         if new_state == 'INIT':
             redis_client.delete('last_request_time')
             redis_client.delete('request_count')
+            redis_client.delete('state_log')  # Clear logs on reset
             print("State reset to INIT")
         elif new_state == 'SHUTDOWN':
             redis_client.delete('current_state')
@@ -122,8 +123,8 @@ def metrics():
         return jsonify({"error": f"Failed to fetch metrics: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    # Initialize the state to INIT if not set
-    if not redis_client.get('current_state'):
-        set_current_state('INIT')
-        log_state_change('Initial', 'INIT')
+    # Reset the state to INIT on startup
+    print("DEBUG: Resetting state to INIT on startup")
+    set_current_state('INIT')
+    log_state_change('Startup', 'INIT')
     app.run(host='0.0.0.0', port=8199)
