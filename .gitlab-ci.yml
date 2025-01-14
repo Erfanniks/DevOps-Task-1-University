@@ -42,9 +42,10 @@ deploy:
   tags:
     - docker
   script:
-    - ssh -o StrictHostKeyChecking=no user@remote-vm "
-        docker-compose -f /path/to/docker-compose.yaml pull &&
-        docker-compose -f /path/to/docker-compose.yaml up -d
-      "
+    - apk update && apk add --no-cache docker-compose
+    # Pull the latest images as needed
+    - docker-compose -f docker-compose.yaml pull
+    # Start containers in detached mode
+    - docker-compose -f docker-compose.yaml up -d
   only:
     - project
