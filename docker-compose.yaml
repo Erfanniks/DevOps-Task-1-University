@@ -9,17 +9,16 @@ services:
 
   service1:
     build: ./service1
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: on-failure
+    container_name: service1
     depends_on:
       - redis
     networks:
       - mynetwork
+    ports:
+      - "5000:5000" # Expose only necessary ports
     volumes:
-      - ./tests:/app/tests  # Mount the tests directory into the container
-      - ./service1:/app  # Ensure service1 code is mounted
+      - ./service1:/app
+      - ./tests:/app/tests
 
   service2:
     build: ./service2
@@ -33,15 +32,11 @@ services:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "8198:8198"
       - "8197:8197"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/.htpasswd:/etc/nginx/.htpasswd
-      - ./nginx/index.html:/usr/share/nginx/html/index.html
     depends_on:
       - service1
-      - service2
     networks:
       - mynetwork
 
