@@ -9,13 +9,10 @@ services:
 
   service1:
     build: ./service1
-    container_name: service1
     depends_on:
       - redis
     networks:
       - mynetwork
-    ports:
-      - "5000:5000" # Expose only necessary ports
     volumes:
       - ./service1:/app
       - ./tests:/app/tests
@@ -23,8 +20,6 @@ services:
   service2:
     build: ./service2
     container_name: service2
-    ports:
-      - "5000:5000"
     networks:
       - mynetwork
 
