@@ -8,5 +8,5 @@ e96a65224369   devopstask1-service1   "python app.py"          About a minute ag
 NETWORK ID     NAME                    DRIVER    SCOPE
 c70e4b5b8761   bridge                  bridge    local
 f110feb190f7   devopstask1_mynetwork   bridge    local
-6cf2ce77223b   host                    host      local
+6cf2ce77223b   host                    host      losdcal
 f9326ae4d5ec   none                    null      local
