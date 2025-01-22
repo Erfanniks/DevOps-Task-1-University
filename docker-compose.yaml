@@ -37,7 +37,7 @@ services:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "8198:80"
+      - "8197:8197"
     depends_on:
       - service1
     volumes:
