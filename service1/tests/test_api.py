@@ -1,7 +1,7 @@
 import requests
 import time
 
-BASE_URL = "http://nginx:80"
+BASE_URL = "http://nginx:8197"
 
 def wait_for_service():
     """Wait for the nginx service to be ready."""
